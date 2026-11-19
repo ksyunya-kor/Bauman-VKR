@@ -5,7 +5,7 @@ from datetime import datetime
 
 # ======= НАСТРОЙКИ ПОДКЛЮЧЕНИЯ =======
 DB_HOST = 'localhost'
-DB_PORT = '5432'          # если 5433 — поменять
+DB_PORT = '5432'          
 DB_NAME = 'gh_houses'
 DB_USER = 'admin'
 DB_PASS = 'admin'
