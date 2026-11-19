@@ -1,0 +1,56 @@
+-- Создаём сырой слой staging
+
+CREATE TABLE stg_houses (
+    full_address                 TEXT,
+    region_name                  VARCHAR(500),
+    region_oktmo                 VARCHAR(11),
+    region_okato                 VARCHAR(11),
+    municipality_oktmo           VARCHAR(11),
+    municipality_okato           VARCHAR(11),
+    postal_code                  VARCHAR(10),
+    latitude                     NUMERIC(12,7),
+    longitude                    NUMERIC(12,7),
+    qc_geo                       VARCHAR(100),
+    timezone                     VARCHAR(100),
+    flats                        INT,
+    fias_id                      VARCHAR(100),
+    cadastral_number             VARCHAR(200),
+    gisgkh_guid                  VARCHAR(100) NOT NULL UNIQUE,
+    house_type                   VARCHAR(300),
+    life_cycle_stage             VARCHAR(300),
+    comissioning_year            INT,
+    building_year                INT,
+    plan_series                  TEXT,
+    total_area                   NUMERIC(20,2),
+    residental_premises_area     NUMERIC(20,2),
+    deterioration                NUMERIC(10,2),
+    deterioration_estimation_date VARCHAR(20),
+    condition                    VARCHAR(100),
+    internal_walls_type          VARCHAR(500),
+    reconstruction_year          INT,
+    energy_efficency_class       VARCHAR(100),
+    house_management_type        VARCHAR(300),
+    management_organization_name VARCHAR(300),
+    management_organization_link VARCHAR(1000),
+    regional_property            VARCHAR(10),
+    municipal_property           VARCHAR(10),
+    loaded_at                    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Расширяем поля в fact_houses (убираем ошибки длины и переполнения)
+
+ALTER TABLE fact_houses ALTER COLUMN full_address TYPE TEXT;
+ALTER TABLE fact_houses ALTER COLUMN cadastral_number TYPE VARCHAR(200);
+ALTER TABLE fact_houses ALTER COLUMN plan_series TYPE TEXT;
+ALTER TABLE fact_houses ALTER COLUMN total_area TYPE NUMERIC(20,2);
+ALTER TABLE fact_houses ALTER COLUMN residental_premises_area TYPE NUMERIC(20,2);
+
+-- Расширяем измерения с длинными строками
+
+ALTER TABLE dim_internal_walls_type ALTER COLUMN internal_walls_type TYPE VARCHAR(500);
+ALTER TABLE dim_management_organization ALTER COLUMN management_organization_name TYPE VARCHAR(300);
+ALTER TABLE dim_management_organization ALTER COLUMN management_organization_link TYPE VARCHAR(1000);
+
+-- Очищаем ранее загруженные данные в fact_houses (перезальём заново)
+
+TRUNCATE fact_houses;

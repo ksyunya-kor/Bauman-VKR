@@ -1,0 +1,52 @@
+--DDL-скрипты для хранилища — жилой фонд ГИС ЖКХ (PostgreSQL) > Версия **без истории изменений** (актуальный снимок).  #
+
+-- 1 Измерение `dim_region 
+
+CREATE TABLE dim_region (region_id SERIAL PRIMARY KEY, region_name VARCHAR(300), region_oktmo VARCHAR(11), region_okato VARCHAR(11), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+--2. Измерение `dim_municipality` ```sql 
+
+CREATE TABLE dim_municipality (municipality_id SERIAL PRIMARY KEY, municipality_name VARCHAR(250), municipality_oktmo VARCHAR(11), municipality_okato VARCHAR(11), region_id INT REFERENCES dim_region(region_id), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+--3. Измерение `dim_house_type` ```sql 
+
+CREATE TABLE dim_house_type (house_type_id SERIAL PRIMARY KEY, house_type VARCHAR(100));
+
+--4. Измерение `dim_internal_walls_type` ```sql 
+
+CREATE TABLE dim_internal_walls_type (walls_type_id SERIAL PRIMARY KEY, internal_walls_type VARCHAR(150));
+
+--5. Измерение `dim_energy_efficency_class` ```sql 
+
+CREATE TABLE dim_energy_efficency_class (energy_class_id SERIAL PRIMARY KEY, energy_class_code VARCHAR(10), energy_class_group VARCHAR(50));
+
+--6. Измерение `dim_date` (календарь) ```sql 
+
+CREATE TABLE dim_date (date_id SERIAL PRIMARY KEY, date DATE NOT NULL UNIQUE, year INT NOT NULL, quarter INT NOT NULL, month INT NOT NULL, month_name VARCHAR(10), day INT NOT NULL, weekday INT, is_weekend_flg BOOLEAN);
+
+--7. Измерение `dim_house_condition` ```sql 
+
+CREATE TABLE dim_house_condition (house_condition_id SERIAL PRIMARY KEY, house_condition VARCHAR(30));
+
+--8. Измерение `dim_house_management_type` ```sql 
+
+CREATE TABLE dim_house_management_type (management_type_id SERIAL PRIMARY KEY, management_type VARCHAR(100));
+
+--9. Измерение `dim_management_organization` ```sql 
+
+CREATE TABLE dim_management_organization (management_organization_id SERIAL PRIMARY KEY, management_organization_name VARCHAR(300), management_organization_link VARCHAR(600));
+
+--10. Измерение `dim_life_cycle_stage_id` ```sql 
+
+CREATE TABLE dim_life_cycle_stage (life_cycle_stage_id SERIAL PRIMARY KEY, life_cycle_stage VARCHAR(100));
+
+--11. Таблица фактов `fact_houses` ```sql 
+
+CREATE TABLE fact_houses (house_id SERIAL PRIMARY KEY, gisghk_id VARCHAR(50) NOT NULL UNIQUE, fias_id VARCHAR(50) NOT NULL, cadastral_number VARCHAR(50), date_id INT REFERENCES dim_date(date_id), deterioration NUMERIC(5,2), house_condition_id INT REFERENCES dim_house_condition(house_condition_id), 
+region_id INT REFERENCES dim_region(region_id), municipality_id INT REFERENCES dim_municipality(municipality_id), postal_code VARCHAR(10), latitude NUMERIC(10,7), longitude NUMERIC(10,7), flats INT, total_area NUMERIC(12,2), residental_premises_area NUMERIC(12,2), plan_series VARCHAR(300), building_year INT, comissioning_year INT, reconstruction_year INT, house_type_id INT REFERENCES dim_house_type(house_type_id), 
+walls_type_id INT REFERENCES dim_internal_walls_type(walls_type_id), energy_class_id INT REFERENCES dim_energy_efficency_class(energy_class_id), management_type_id INT REFERENCES dim_house_management_type(management_type_id), management_organization_id INT REFERENCES dim_management_organization(management_organization_id), regional_property_flg BOOLEAN, municipal_property_flg BOOLEAN, full_address TEXT, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ); 
+
+CREATE INDEX idx_fact_houses_region ON fact_houses(region_id); 
+CREATE INDEX idx_fact_houses_municipality ON fact_houses(municipality_id);
+
